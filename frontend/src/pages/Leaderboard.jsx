@@ -6,7 +6,7 @@ const Leaderboard = () => {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/workouts/leaderboard");
+        const response = await fetch("https://flex-it-out-seven.vercel.app/api/workouts/leaderboard");
         const data = await response.json();
         setLeaderboard(data);
       } catch (error) {
