@@ -21,13 +21,11 @@ app.get("/", (req, res) => {
   res.send("Flex-It-Out Backend Running!");
 });
 
-
 const authRoutes = require("./routes/authRoutes");
 app.use("/api/auth", authRoutes);
 
 const workoutRoutes = require("./routes/workoutRoutes");
 app.use("/api/workouts", workoutRoutes);
-
 
 // Start Server
 const PORT = process.env.PORT || 5000;
