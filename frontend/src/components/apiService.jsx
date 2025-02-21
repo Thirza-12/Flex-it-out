@@ -12,7 +12,7 @@ export const geminiAPI = async (question) => {
 
     // Sending the POST request to Gemini API for other questions
     const response = await axios({
-      url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyAAsHdgODx8u9p836tEoAfrW5LgnVWC5U0`,
+      url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyDM0AFVjok7xYz0shnuFFdNuANFQJO3wEE`,
       method: "post",
       data: {
         contents: [
