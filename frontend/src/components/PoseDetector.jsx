@@ -166,7 +166,7 @@ const PoseDetector = () => {
   
     const token = localStorage.getItem("token");
     try {
-      const response = await fetch("http://localhost:5000/api/workouts/save", {
+      const response = await fetch("https://flex-it-out-seven.vercel.app/api/workouts/save", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
