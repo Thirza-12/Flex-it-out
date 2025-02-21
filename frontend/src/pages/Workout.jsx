@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import PoseDetector from "../components/PoseDetector";
-import BicepCurlGif from "../assets/curls.mp4";
+import BicepCurlGif from "../assets/curls.mp4"; // Make sure to change the gif or video path if needed
 
 function Workout() {
   const [startWorkout, setStartWorkout] = useState(false);
