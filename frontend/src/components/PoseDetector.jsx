@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useState } from 'react';
 import { Camera } from '@mediapipe/camera_utils';
 import { Pose, POSE_CONNECTIONS } from '@mediapipe/pose';
@@ -18,6 +19,14 @@ const PoseDetector = () => {
       Math.atan2(c.y - b.y, c.x - b.x) - Math.atan2(a.y - b.y, a.x - b.x);
     let angle = Math.abs((radians * 180.0) / Math.PI);
     return angle > 180 ? 360 - angle : angle;
+  };
+
+  const calculateKneeAngle = (hip, knee, ankle) => {
+    return calculateAngle(hip, knee, ankle);
+  };
+
+  const calculateOverheadPressAngle = (shoulder, elbow, wrist) => {
+    return calculateAngle(shoulder, elbow, wrist);
   };
 
   useEffect(() => {
@@ -49,30 +58,74 @@ const PoseDetector = () => {
       drawConnectors(ctx, results.poseLandmarks, POSE_CONNECTIONS, { color: '#00FF00', lineWidth: 2 });
       drawLandmarks(ctx, results.poseLandmarks, { color: '#FF0000', lineWidth: 1, radius: 3 });
 
+      // **Bicep Curl Angle Calculation**
       const shoulder = results.poseLandmarks[12];
       const elbow = results.poseLandmarks[14];
       const wrist = results.poseLandmarks[16];
 
       if (shoulder && elbow && wrist) {
-        const angle = calculateAngle(shoulder, elbow, wrist);
+        const bicepCurlAngle = calculateOverheadPressAngle(shoulder, elbow, wrist);
         ctx.font = '20px Arial';
         ctx.fillStyle = 'white';
-        ctx.fillText(`Elbow Angle: ${angle.toFixed(1)}°`, 10, 30);
+        ctx.fillText(`Elbow Angle: ${bicepCurlAngle.toFixed(1)}°`, 10, 30);
 
-        if (angle > 160) {
+        if (bicepCurlAngle > 160) {
           if (stageRef.current === 'bent') {
             setCounter((prevCount) => prevCount + 1);
             setStage('straight');
           } else if (stageRef.current === null) {
             setStage('straight');
           }
-        } else if (angle < 60 && stageRef.current === 'straight') {
+        } else if (bicepCurlAngle < 60 && stageRef.current === 'straight') {
           setStage('bent');
         }
       }
 
-      ctx.fillText(`Stage: ${stageRef.current || 'Initializing...'}`, 10, 60);
+      // **Overhead Press Angle Calculation**
+      const shoulderOverhead = results.poseLandmarks[12]; // Right shoulder
+      const elbowOverhead = results.poseLandmarks[14]; // Right elbow
+      const wristOverhead = results.poseLandmarks[16]; // Right wrist
+
+      if (shoulderOverhead && elbowOverhead && wristOverhead) {
+        const overheadPressAngle = calculateOverheadPressAngle(shoulderOverhead, elbowOverhead, wristOverhead);
+        ctx.fillText(`Overhead Press Angle: ${overheadPressAngle.toFixed(1)}°`, 10, 60);
+
+        if (overheadPressAngle > 160) {
+          if (stageRef.current === 'lowered') {
+            setCounter((prevCount) => prevCount + 1);
+            setStage('raised');
+          } else if (stageRef.current === null) {
+            setStage('raised');
+          }
+        } else if (overheadPressAngle < 60 && stageRef.current === 'raised') {
+          setStage('lowered');
+        }
+      }
+
+      // **Squat Angle Calculation**
+      const hip = results.poseLandmarks[11]; // Left hip
+      const knee = results.poseLandmarks[13]; // Left knee
+      const ankle = results.poseLandmarks[15]; // Left ankle
+
+      if (hip && knee && ankle) {
+        const squatAngle = calculateKneeAngle(hip, knee, ankle);
+        ctx.fillText(`Knee Angle: ${squatAngle.toFixed(1)}°`, 10, 90);
+
+        if (squatAngle < 60) {
+          if (stageRef.current === 'standing') {
+            setCounter((prevCount) => prevCount + 1);
+            setStage('squatting');
+          } else if (stageRef.current === null) {
+            setStage('squatting');
+          }
+        } else if (squatAngle > 160 && stageRef.current === 'squatting') {
+          setStage('standing');
+        }
+      }
+
+      ctx.fillText(`Stage: ${stageRef.current || 'Initializing...'}`, 10, 120);
     }
+
     ctx.restore();
   };
 
@@ -134,7 +187,7 @@ const PoseDetector = () => {
   };
 
   return (
-    <div className="flex justify-center items-center  bg-gray-900 text-white">
+    <div className="flex justify-center items-center bg-gray-900 text-white">
       <div className="flex flex-col sm:flex-row items-center bg-gray-800 p-4 rounded-lg shadow-lg gap-4">
         {/* Video + Canvas */}
         <div className="relative w-[480px] h-[360px]">
